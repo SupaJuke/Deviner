@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS pooe_game;
+CREATE DATABASE pooe_game;
