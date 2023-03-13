@@ -1,2 +1,8 @@
-DROP DATABASE IF EXISTS pooe_game;
-CREATE DATABASE pooe_game;
+DROP SCHEMA IF EXISTS pooe_game CASCADE;
+CREATE SCHEMA pooe_game;
+SET search_path TO pooe_game;
+
+CREATE TABLE Users(
+	username VARCHAR(255) PRIMARY KEY,
+	password TEXT
+);

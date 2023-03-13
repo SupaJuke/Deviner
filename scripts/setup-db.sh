@@ -1,7 +1,12 @@
 #!/bin/bash
+if [[ $(docker --version) ]]
+then
+	echo uwu
+fi
 
-# Set default value for dbname
+# Set default value for container name
 docker_name=postgres
+db_name=pooe_game_db
 
 if [ $# -gt 0 ]
 then
@@ -12,5 +17,7 @@ fi
 docker cp scripts/schema.sql $docker_name:.
 
 # Setup db
-docker exec postgres chmod 777 schema.sql
-docker exec -u postgres postgres psql -f schema.sql
+docker exec $docker_name chmod 777 schema.sql
+docker exec -u postgres $docker_name dropdb --if-exists $db_name
+docker exec -u postgres $docker_name createdb $db_name
+docker exec -u postgres $docker_name psql -d $db_name -f schema.sql

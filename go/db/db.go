@@ -1,32 +1,35 @@
-package pooe_hw
+package database
 
 import (
 	"database/sql"
-	_ "database/sql"
 	"fmt"
-	_ "fmt"
 	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 )
 
-const (
-	HOST     = "localhost"
-	PORT     = 5432
-	USER     = "postgres"
-	PASSWORD = "password"
-	DBNAME   = ""
-)
+var Db *sql.DB
 
-func main() string {
+func InitDB() {
+	
+    var (
+        USER        = os.Getenv("DB_USER")
+        PASSWORD    = os.Getenv("DB_PASS")
+        HOST        = os.Getenv("DB_HOST")
+        PORT        = os.Getenv("DB_PORT")
+        NAME        = os.Getenv("DB_NAME")
+    )
+
 	connString := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		HOST, PORT, USER, PASSWORD, DBNAME,
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		HOST, PORT, USER, PASSWORD, NAME,
 	)
-	DB, err := sql.Open("postgres", connString)
+
+	db, err := sql.Open("postgres", connString)
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer DB.Close()
-	return "Why hello there"
+		log.Fatalln("Failed connecting to db", err)
+    }
+
+	Db = db
 }
