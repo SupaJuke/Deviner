@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	db "github.com/SupaJuke/pooe-guessing-game/go/db"
+	db "github.com/SupaJuke/pooe-guessing-game/go/internal/db"
 
 	"github.com/joho/godotenv"
 )
