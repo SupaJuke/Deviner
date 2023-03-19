@@ -1,4 +1,4 @@
-# Ignore
-.vscode
-.env
-go/vendor/
+# *
+!README.md
+!go
+!react
