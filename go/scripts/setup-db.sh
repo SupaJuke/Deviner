@@ -16,13 +16,13 @@ then
 	source ./.env
 
 	# Copy schema.sql to container
-	docker cp scripts/schema.sql $CONTAINER_NAME:.
+	docker cp migrations/schema.sql $CONTAINER_NAME:.
 
 	# Setup db
 	docker exec $CONTAINER_NAME chmod 777 schema.sql
 	docker exec -u postgres $CONTAINER_NAME dropdb --if-exists $DB_NAME
 	docker exec -u postgres $CONTAINER_NAME createdb $DB_NAME
-	docker exec -u postgres $CONTAINER_NAME psql -d $DB_NAME -f migrations/schema.sql
+	docker exec -u postgres $CONTAINER_NAME psql -d $DB_NAME -f schema.sql
 else
 	echo Docker is not installed. Please install Docker before using this script.
 fi

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
+	_ "os"
 	"strings"
 	"time"
 
@@ -12,12 +12,19 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = os.Getenv("JWT_KEY")
+// var jwtKey = os.Getenv("JWT_KEY")
+// This is from "SupaJuke"
+var jwtKey = "1BA76F929C1AB69D6E0BA0AEC9F477ACC3563A9F65571B095E1D510AA20E9F62"
 
 // NOTE: can use type "Credentials" instead of "User"
 type Claims struct {
 	Username string `json:"username"`
 	jwt.RegisteredClaims
+}
+
+type Credentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type Response struct {
@@ -36,7 +43,10 @@ func Serve() {
 	mux.Handle("/guess", authenticate(http.HandlerFunc(guess)))
 
 	// Serve
-	log.Fatal("Error while serving: ", http.ListenAndServe(":8080", mux))
+	log.Println("Now listening and serving on port 8080")
+	if err := http.ListenAndServe(":8080", mux); err != nil {
+		log.Fatal("Error while serving")
+	}
 }
 
 func getJWTKey(token *jwt.Token) (interface{}, error) {
@@ -86,29 +96,38 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	// Check method
 	if method := r.Method; method != "POST" {
+		log.Println("Method not supported: ", method)
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	username := r.FormValue("username")
-	pwd := r.FormValue("pwd")
+	cred := Credentials{}
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&cred); err != nil {
+		log.Println("Error while parsing request: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	// Check username not empty
-	if username == "" {
+	if cred.Username == "" {
+		log.Println("Username empty: ", cred.Username)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	// Check username exists in db
-	user, err := accounts.GetByUsername(username)
+	user, err := accounts.GetByUsername(cred.Username)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Failed while getting user: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	// Check password
-	auth := user.Authenticate(pwd)
+	auth := user.Authenticate(cred.Password)
 	if auth == nil {
+		log.Println("Password Incorrect")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -123,14 +142,16 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, err := token.SignedString(jwtKey)
+	tokenStr, err := token.SignedString([]byte(jwtKey))
 	if err != nil {
+		log.Fatal("Internal error while generating token: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res, err := json.Marshal(Response{Token: tokenStr})
 	if err != nil {
+		log.Fatal("Internal error while encoding response: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -140,6 +161,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("User '%s' logged in successfully", cred.Username)
 
 	// NOTE: implement cookie down the line?
 	/*

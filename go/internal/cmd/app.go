@@ -16,5 +16,6 @@ func Run() {
 	}
 
 	db.InitDB()
+	log.Println("Initialized connection to database")
 	service.Serve()
 }

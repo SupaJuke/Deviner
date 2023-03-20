@@ -32,4 +32,8 @@ func InitDB() {
 	}
 
 	DB = db
+	_, err = DB.Exec("SET search_path TO pooe_game;")
+	if err != nil {
+		log.Fatalln("Failed while setting search_path: ", err)
+	}
 }

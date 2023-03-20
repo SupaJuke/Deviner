@@ -44,13 +44,12 @@ func Create(username string, pwd string) (User, error) {
 }
 
 func GetByUsername(username string) (User, error) {
-	query := "SELECT username, password FROM Users WHERE username = ? LIMIT 1"
+	query := "SELECT username, password FROM Users WHERE username = $1 LIMIT 1"
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {
 		return User{}, err
 	}
 	defer stmt.Close()
-
 	row, err := stmt.Query(username)
 	if err != nil {
 		return User{}, err

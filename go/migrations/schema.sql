@@ -6,3 +6,6 @@ CREATE TABLE Users(
 	username VARCHAR(255) PRIMARY KEY,
 	password TEXT
 );
+
+INSERT INTO Users (username, password)
+VALUES ('admin', '');
