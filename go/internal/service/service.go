@@ -16,7 +16,6 @@ import (
 // This is from "SupaJuke"
 var jwtKey = "1BA76F929C1AB69D6E0BA0AEC9F477ACC3563A9F65571B095E1D510AA20E9F62"
 
-// NOTE: can use type "Credentials" instead of "User"
 type Claims struct {
 	Username string `json:"username"`
 	jwt.RegisteredClaims
@@ -50,7 +49,7 @@ func Serve() {
 }
 
 func getJWTKey(token *jwt.Token) (interface{}, error) {
-	return jwtKey, nil
+	return []byte(jwtKey), nil
 }
 
 func getTokenFromHeader(r *http.Request) string {
@@ -70,8 +69,9 @@ func authenticate(next http.Handler) http.Handler {
 		}
 
 		claims := Claims{}
-		token, err := jwt.ParseWithClaims(tokenStr, claims, getJWTKey)
+		token, err := jwt.ParseWithClaims(tokenStr, &claims, getJWTKey)
 		if err != nil {
+			log.Println("failed after parsing claims:", err)
 			if err == jwt.ErrSignatureInvalid {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
@@ -86,6 +86,7 @@ func authenticate(next http.Handler) http.Handler {
 		}
 
 		// TODO: authorize here (check user against permission)
+		// TODO2: maybe check curr username against username in token
 
 		next.ServeHTTP(w, r)
 	})
@@ -173,4 +174,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func guess(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write([]byte("uwu"))
+	if err != nil {
+		return
+	}
 }

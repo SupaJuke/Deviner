@@ -8,4 +8,6 @@ CREATE TABLE Users(
 );
 
 INSERT INTO Users (username, password)
-VALUES ('admin', '');
+VALUES
+('admin', ''),
+('test', '');
