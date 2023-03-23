@@ -10,10 +10,8 @@ then
 		CONTAINER_NAME=$1
 	fi
 
-	# Set default value for db_name
-	DB_NAME=pooe_game_db
-
-	source ./.env
+	# Load env vars from .env
+	set -a; source .env; set +a
 
 	# Copy schema.sql to container
 	docker cp migrations/schema.sql $CONTAINER_NAME:.
@@ -22,7 +20,7 @@ then
 	docker exec $CONTAINER_NAME chmod 777 schema.sql
 	docker exec -u postgres $CONTAINER_NAME dropdb --if-exists $DB_NAME
 	docker exec -u postgres $CONTAINER_NAME createdb $DB_NAME
-	docker exec -u postgres $CONTAINER_NAME psql -d $DB_NAME -f schema.sql
+	docker exec -u postgres $CONTAINER_NAME psql -d $DB_NAME -f schema.sql -v DB_SCHEMA=deviner
 else
 	echo Docker is not installed. Please install Docker before using this script.
 fi

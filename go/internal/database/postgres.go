@@ -19,6 +19,7 @@ func InitDB() {
 		HOST     = os.Getenv("DB_HOST")
 		PORT     = os.Getenv("DB_PORT")
 		NAME     = os.Getenv("DB_NAME")
+		SCHEMA   = os.Getenv("DB_SCHEMA")
 	)
 
 	connString := fmt.Sprintf(
@@ -32,7 +33,8 @@ func InitDB() {
 	}
 
 	DB = db
-	_, err = DB.Exec("SET search_path TO pooe_game;")
+	stmt := fmt.Sprintf("SET search_path TO %s;", SCHEMA)
+	_, err = DB.Exec(stmt)
 	if err != nil {
 		log.Fatalln("Failed while setting search_path: ", err)
 	}

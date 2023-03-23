@@ -4,7 +4,7 @@ import (
 	"log"
 
 	db "github.com/SupaJuke/Deviner/go/internal/database"
-	"github.com/SupaJuke/Deviner/go/internal/routes"
+	"github.com/SupaJuke/Deviner/go/internal/router"
 	"github.com/joho/godotenv"
 )
 
@@ -17,5 +17,5 @@ func Run() {
 
 	db.InitDB()
 	log.Println("Initialized connection to database")
-	routes.Serve()
+	router.Serve()
 }

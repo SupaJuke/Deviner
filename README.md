@@ -1,4 +1,4 @@
-# Pooe Guessing Game
+# Deviner
 
 A project I should have made 2 years ago for Agoda internship.
 
