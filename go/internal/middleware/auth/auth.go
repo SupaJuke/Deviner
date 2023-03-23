@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SupaJuke/Deviner/go/internal/accounts"
+	"github.com/SupaJuke/Deviner/go/internal/models/users"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -45,7 +45,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check username exists in db
-	user, err := accounts.GetByUsername(cred.Username)
+	user, err := users.GetByUsername(cred.Username)
 	if err != nil {
 		log.Println("Failed while getting user: ", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -70,7 +70,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, err := token.SignedString(getKey())
+	tokenStr, err := token.SignedString(getJWTKey())
 	if err != nil {
 		log.Fatal("Internal error while generating token: ", err)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/SupaJuke/Deviner/go/internal/guess"
+	"github.com/SupaJuke/Deviner/go/internal/handlers"
 	"github.com/SupaJuke/Deviner/go/internal/middleware/auth"
 )
 
-// ================================ Middleware ================================
+// ================================ Middleware ================================ //
 
 func Method(methods ...string) func(handler http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
@@ -43,17 +43,19 @@ func Auth(handler http.Handler) http.Handler {
 	return auth.Authorize(handler)
 }
 
-// ================================== Routes ==================================
+// ================================== Routes ================================== //
 
 func Serve() {
 	mux := http.NewServeMux()
 
-	// Login
-	loginHandler := http.HandlerFunc(auth.Authenticate)
+	// Handlers
+	loginHandler := http.HandlerFunc(handlers.Authenticate)
+	guessHandler := http.HandlerFunc(handlers.CheckGuess)
+
+	// Pre-authorized
 	mux.Handle("/login", Method("POST")(loginHandler))
 
-	// Guess
-	guessHandler := http.HandlerFunc(guess.Guess)
+	// Post-authorized
 	mux.Handle("/guess", Method("POST")(Auth(guessHandler)))
 
 	// Serve
@@ -63,4 +65,4 @@ func Serve() {
 	}
 }
 
-// ============================================================================
+// ============================================================================ //

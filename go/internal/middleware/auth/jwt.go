@@ -20,7 +20,7 @@ func jwtKeyFunc(token *jwt.Token) (interface{}, error) {
 	return []byte(JWTKey), nil
 }
 
-func getKey() []byte {
+func getJWTKey() []byte {
 	return []byte(os.Getenv("JWT_KEY"))
 }
 
