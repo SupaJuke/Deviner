@@ -27,7 +27,7 @@ func Method(methods ...string) func(handler http.Handler) http.Handler {
 				w.WriteHeader(http.StatusMethodNotAllowed)
 				_, err := w.Write([]byte("Method not supported. Expected " + strings.Join(methods, " ")))
 				if err != nil {
-					log.Panic("Error while writing response [ValidateGet]", err)
+					log.Panicln("Error while writing response [ValidateGet]", err)
 				}
 				return
 			}
@@ -61,7 +61,7 @@ func Serve() {
 	// Serve
 	log.Println("Now listening and serving on port 8080")
 	if err := http.ListenAndServe(":8080", mux); err != nil {
-		log.Fatal("Error while serving")
+		log.Fatalln("Error while serving")
 	}
 }
 

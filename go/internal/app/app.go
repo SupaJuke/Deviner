@@ -2,8 +2,10 @@ package app
 
 import (
 	"log"
+	"os"
 
 	db "github.com/SupaJuke/Deviner/go/internal/database"
+	"github.com/SupaJuke/Deviner/go/internal/middleware/auth"
 	"github.com/SupaJuke/Deviner/go/internal/router"
 	"github.com/joho/godotenv"
 )
@@ -12,10 +14,11 @@ import (
 
 func Run() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	db.InitDB()
 	log.Println("Initialized connection to database")
+	auth.JWTKey = os.Getenv("JWT_KEY")
 	router.Serve()
 }

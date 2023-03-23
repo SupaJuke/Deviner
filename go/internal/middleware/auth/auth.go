@@ -33,10 +33,11 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&cred); err != nil {
-		log.Println("Error while parsing request: ", err)
+		log.Println("Error while parsing request [Authenticate]: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	// Check username not empty
 	if cred.Username == "" {
 		log.Println("Username empty: ", cred.Username)
@@ -61,7 +62,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Genearting token for user
-	expTime := time.Now().Add(30 * time.Minute)
+	expTime := time.Now().Add(24 * time.Hour)
 	claims := Claims{
 		Username: user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -70,16 +71,16 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, err := token.SignedString(getJWTKey())
+	tokenStr, err := token.SignedString([]byte(JWTKey))
 	if err != nil {
-		log.Fatal("Internal error while generating token: ", err)
+		log.Println("Internal error while generating token: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res, err := json.Marshal(Response{Token: tokenStr})
 	if err != nil {
-		log.Fatal("Internal error while encoding response: ", err)
+		log.Println("Internal error while encoding response: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -87,6 +88,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write(res)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("Internal error while writing response: ", err)
 		return
 	}
 
@@ -102,20 +104,21 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 
 func Authorize(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenStr := getTokenFromHeader(r)
+		tokenStr := GetTokenFromHeader(r)
 		if tokenStr == "" {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
 		claims := Claims{}
-		token, err := jwt.ParseWithClaims(tokenStr, &claims, jwtKeyFunc)
+		token, err := jwt.ParseWithClaims(tokenStr, &claims, JWTKeyFunc)
 		if err != nil {
 			log.Println("failed after parsing claims:", err)
 			if err == jwt.ErrSignatureInvalid {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
+
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}

@@ -17,23 +17,23 @@ type User struct {
 
 func Create(username string, pwd string) (User, error) {
 	user := User{}
-	query := "INSERT INTO Users(username, password) VALUES(?, ?)"
+	query := "INSERT INTO Users(username, password) VALUES($1, $2)"
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return user, err
 	}
 	defer stmt.Close()
 
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return user, err
 	}
 
 	_, err = stmt.Exec(username, string(hashedPwd))
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return user, err
 	}
 
@@ -50,6 +50,7 @@ func GetByUsername(username string) (User, error) {
 		return User{}, err
 	}
 	defer stmt.Close()
+
 	row, err := stmt.Query(username)
 	if err != nil {
 		return User{}, err
@@ -66,22 +67,22 @@ func GetByUsername(username string) (User, error) {
 }
 
 func (user User) Update() error {
-	query := "UPDATE User SET password = ? WHERE username = ?"
+	query := "UPDATE User SET password = $1 WHERE username = $2"
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 	defer stmt.Close()
 
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(user.Pwd), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	_, err = stmt.Exec(string(hashedPwd), user.Username)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 
@@ -91,17 +92,17 @@ func (user User) Update() error {
 }
 
 func (user User) Delete() error {
-	query := "DELETE FROM Users WHERE username = ?"
+	query := "DELETE FROM Users WHERE username = $1"
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(user.Username)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return err
 	}
 
@@ -116,4 +117,33 @@ func (user User) Delete() error {
 // Returns nil on successful, error otherwise
 func (user User) Authenticate(pwd string) error {
 	return bcrypt.CompareHashAndPassword([]byte(user.Pwd), []byte(pwd))
+}
+
+func (user User) GetCode() (string, error) {
+	query := "SELECT code FROM Users WHERE username = $1"
+	code := ""
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		log.Println(err)
+		return code, err
+	}
+	defer stmt.Close()
+
+	row, err := stmt.Query(user.Username)
+	if err != nil {
+		return code, err
+	}
+	defer row.Close()
+
+	row.Next()
+	if err := row.Scan(&code); err != nil {
+		return code, err
+	}
+
+	return code, nil
+}
+
+func (user User) GenerateNewCode() error {
+	// TODO
+	return nil
 }

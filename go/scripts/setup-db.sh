@@ -20,7 +20,7 @@ then
 	docker exec $CONTAINER_NAME chmod 777 schema.sql
 	docker exec -u postgres $CONTAINER_NAME dropdb --if-exists $DB_NAME
 	docker exec -u postgres $CONTAINER_NAME createdb $DB_NAME
-	docker exec -u postgres $CONTAINER_NAME psql -d $DB_NAME -f schema.sql -v DB_SCHEMA=deviner
+	docker exec -u postgres $CONTAINER_NAME psql -d $DB_NAME -f schema.sql -v DB_SCHEMA=$DB_SCHEMA
 else
 	echo Docker is not installed. Please install Docker before using this script.
 fi
