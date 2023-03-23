@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/SupaJuke/pooe-guessing-game/go/internal/cmd"
+	"github.com/SupaJuke/Deviner/go/internal/app"
 )
 
 // const defaultPort = "8080"
 
 func main() {
-	cmd.Run()
+	app.Run()
 }

@@ -1,4 +1,4 @@
-module github.com/SupaJuke/pooe-guessing-game/go
+module github.com/SupaJuke/Deviner/go
 
 go 1.19
 

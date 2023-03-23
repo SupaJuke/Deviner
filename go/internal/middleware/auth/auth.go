@@ -1,20 +1,15 @@
-package service
+package auth
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
-	_ "os"
-	"strings"
 	"time"
 
-	"github.com/SupaJuke/pooe-guessing-game/go/internal/accounts"
+	"github.com/SupaJuke/Deviner/go/internal/accounts"
+
 	"github.com/golang-jwt/jwt/v5"
 )
-
-// var jwtKey = os.Getenv("JWT_KEY")
-// This is from "SupaJuke"
-var jwtKey = "1BA76F929C1AB69D6E0BA0AEC9F477ACC3563A9F65571B095E1D510AA20E9F62"
 
 type Claims struct {
 	Username string `json:"username"`
@@ -32,76 +27,8 @@ type Response struct {
 	Msg     string `json:"message,omitempty"`
 }
 
-func Serve() {
-	mux := http.NewServeMux()
-
-	// Login
-	mux.HandleFunc("/login", login)
-
-	// Guess
-	mux.Handle("/guess", authenticate(http.HandlerFunc(guess)))
-
-	// Serve
-	log.Println("Now listening and serving on port 8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
-		log.Fatal("Error while serving")
-	}
-}
-
-func getJWTKey(token *jwt.Token) (interface{}, error) {
-	return []byte(jwtKey), nil
-}
-
-func getTokenFromHeader(r *http.Request) string {
-	if _, tokenStr, ok := strings.Cut(r.Header.Get("Authentication"), "token "); ok {
-		return tokenStr
-	}
-	return ""
-}
-
-func authenticate(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		tokenStr := getTokenFromHeader(r)
-		if tokenStr == "" {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		claims := Claims{}
-		token, err := jwt.ParseWithClaims(tokenStr, &claims, getJWTKey)
-		if err != nil {
-			log.Println("failed after parsing claims:", err)
-			if err == jwt.ErrSignatureInvalid {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		if !token.Valid {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		// TODO: authorize here (check user against permission)
-		// TODO2: maybe check curr username against username in token
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func login(w http.ResponseWriter, r *http.Request) {
+func Authenticate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-
-	// Check method
-	if method := r.Method; method != "POST" {
-		log.Println("Method not supported: ", method)
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
 	cred := Credentials{}
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
@@ -143,7 +70,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, err := token.SignedString([]byte(jwtKey))
+	tokenStr, err := token.SignedString(getKey())
 	if err != nil {
 		log.Fatal("Internal error while generating token: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -173,9 +100,34 @@ func login(w http.ResponseWriter, r *http.Request) {
 	*/
 }
 
-func guess(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("uwu"))
-	if err != nil {
-		return
-	}
+func Authorize(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenStr := getTokenFromHeader(r)
+		if tokenStr == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		claims := Claims{}
+		token, err := jwt.ParseWithClaims(tokenStr, &claims, jwtKeyFunc)
+		if err != nil {
+			log.Println("failed after parsing claims:", err)
+			if err == jwt.ErrSignatureInvalid {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if !token.Valid {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		// TODO: maybe check curr username against username in token
+		// TODO: check user permission
+
+		handler.ServeHTTP(w, r)
+	})
 }

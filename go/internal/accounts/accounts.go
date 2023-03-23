@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	db "github.com/SupaJuke/pooe-guessing-game/go/internal/database"
+	db "github.com/SupaJuke/Deviner/go/internal/database"
 	"golang.org/x/crypto/bcrypt"
 )
 
