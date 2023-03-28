@@ -3,14 +3,17 @@ package users
 import (
 	"fmt"
 	"log"
+	"math/big"
+
+	"crypto/rand"
 
 	db "github.com/SupaJuke/Deviner/go/internal/database"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	Username string `json:"Username"`
-	Pwd      string `json:"password"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // ------------------------- CRUD functionalities -------------------------
@@ -37,9 +40,9 @@ func Create(username string, pwd string) (User, error) {
 		return user, err
 	}
 
+	user = User{Username: username, Password: string(hashedPwd)}
 	logStr := fmt.Sprintf("User %s created", user.Username)
 	log.Println(logStr)
-	user = User{username, string(hashedPwd)}
 	return user, nil
 }
 
@@ -59,14 +62,14 @@ func GetByUsername(username string) (User, error) {
 
 	user := User{}
 	row.Next()
-	if err := row.Scan(&user.Username, &user.Pwd); err != nil {
+	if err := row.Scan(&user.Username, &user.Password); err != nil {
 		return User{}, err
 	}
 
 	return user, nil
 }
 
-func (user User) Update() error {
+func (user User) UpdatePwd() error {
 	query := "UPDATE User SET password = $1 WHERE username = $2"
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {
@@ -75,7 +78,7 @@ func (user User) Update() error {
 	}
 	defer stmt.Close()
 
-	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(user.Pwd), bcrypt.DefaultCost)
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Println(err)
 	}
@@ -116,7 +119,7 @@ func (user User) Delete() error {
 // Compares given password with the user's hashed password.
 // Returns nil on successful, error otherwise
 func (user User) Authenticate(pwd string) error {
-	return bcrypt.CompareHashAndPassword([]byte(user.Pwd), []byte(pwd))
+	return bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(pwd))
 }
 
 func (user User) GetCode() (string, error) {
@@ -144,6 +147,31 @@ func (user User) GetCode() (string, error) {
 }
 
 func (user User) GenerateNewCode() error {
-	// TODO
+	// Randomizing a new code
+	bigI, err := rand.Int(rand.Reader, big.NewInt(100000))
+	if err != nil {
+		log.Println("Failed to generate new code for user: ", user.Username)
+		return err
+	}
+
+	// Inserting the new code to DB
+	code := bigI.String()
+	query := "UPDATE User SET code = $1 WHERE username = $2"
+	stmt, err := db.DB.Prepare(query)
+	if err != nil {
+		log.Println("Error while preparing statement [GenerateNewCode]")
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(code, user.Username)
+	if err != nil {
+		log.Println("Error while updating new code")
+		return err
+	}
+
+	// Successfully updated the new code
+	logStr := fmt.Sprintf("Updated user %s code to %s", user.Username, code)
+	log.Println(logStr)
 	return nil
 }

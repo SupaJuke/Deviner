@@ -55,7 +55,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 
 	// Check password
 	auth := user.Authenticate(cred.Password)
-	if auth == nil {
+	if auth != nil {
 		log.Println("Password Incorrect")
 		w.WriteHeader(http.StatusUnauthorized)
 		return

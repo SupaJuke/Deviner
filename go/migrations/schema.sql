@@ -5,10 +5,10 @@ SET search_path TO :DB_SCHEMA;
 CREATE TABLE Users(
 	username VARCHAR(255) PRIMARY KEY,
 	password TEXT,
-	code 	 TEXT DEFAULT '7412'
+	code 	 TEXT DEFAULT '63556' -- Nello
 );
 
 INSERT INTO Users (username, password)
 VALUES
-('admin', ''),
-('test', '');
+('admin', '');
+-- ('test', '');
