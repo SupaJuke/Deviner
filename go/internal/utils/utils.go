@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/SupaJuke/Deviner/go/internal/middleware/auth"
+	"github.com/SupaJuke/Indovinare/go/internal/middleware/auth"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -25,7 +25,6 @@ func parseStatus(status int) string {
 }
 
 func GetUsernameFromJWT(tokenStr string) string {
-	log.Println("token: ", tokenStr)
 	claims := Claims{}
 	_, err := jwt.ParseWithClaims(tokenStr, &claims, auth.JWTKeyFunc)
 	if err != nil {

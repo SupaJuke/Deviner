@@ -1,4 +1,4 @@
-module github.com/SupaJuke/Deviner/go
+module github.com/SupaJuke/Indovinare/go
 
 go 1.19
 

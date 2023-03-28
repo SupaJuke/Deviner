@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 
-	"github.com/SupaJuke/Deviner/go/internal/middleware/auth"
-	"github.com/SupaJuke/Deviner/go/internal/models/users"
-	"github.com/SupaJuke/Deviner/go/internal/utils"
+	"github.com/SupaJuke/Indovinare/go/internal/middleware/auth"
+	"github.com/SupaJuke/Indovinare/go/internal/models/users"
+	"github.com/SupaJuke/Indovinare/go/internal/utils"
 )
 
 type Guess struct {
@@ -20,6 +21,7 @@ type Response struct {
 }
 
 func CheckGuess(w http.ResponseWriter, r *http.Request) {
+	// Parsing request
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	guess := Guess{}
@@ -29,9 +31,9 @@ func CheckGuess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Extracting guess
 	tokenStr := auth.GetTokenFromHeader(r)
 	username := utils.GetUsernameFromJWT(tokenStr)
-	log.Println("username :", username)
 	user, err := users.GetByUsername(username)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -39,10 +41,25 @@ func CheckGuess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch code from DB
 	code, err := user.GetCode()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("Failed to get user's code: ", err)
+		return
+	}
+
+	// Validating answer
+	p := "^[0-9]{5}$"
+	matched, err := regexp.MatchString(p, guess.Guess)
+	if err != nil {
+		log.Println("Error while matching regexp pattern")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !matched {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("Request not in the specified format: ", guess.Guess)
 		return
 	}
 

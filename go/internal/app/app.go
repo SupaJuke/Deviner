@@ -4,10 +4,9 @@ import (
 	"log"
 	"os"
 
-	db "github.com/SupaJuke/Deviner/go/internal/database"
-	"github.com/SupaJuke/Deviner/go/internal/middleware/auth"
-	"github.com/SupaJuke/Deviner/go/internal/models/users"
-	"github.com/SupaJuke/Deviner/go/internal/router"
+	db "github.com/SupaJuke/Indovinare/go/internal/database"
+	"github.com/SupaJuke/Indovinare/go/internal/middleware/auth"
+	"github.com/SupaJuke/Indovinare/go/internal/router"
 
 	"github.com/joho/godotenv"
 )

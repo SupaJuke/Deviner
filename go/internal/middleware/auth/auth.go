@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SupaJuke/Deviner/go/internal/models/users"
+	"github.com/SupaJuke/Indovinare/go/internal/models/users"
 
 	"github.com/golang-jwt/jwt/v5"
 )

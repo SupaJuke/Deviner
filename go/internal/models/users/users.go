@@ -7,7 +7,7 @@ import (
 
 	"crypto/rand"
 
-	db "github.com/SupaJuke/Deviner/go/internal/database"
+	db "github.com/SupaJuke/Indovinare/go/internal/database"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -156,7 +156,7 @@ func (user User) GenerateNewCode() error {
 
 	// Inserting the new code to DB
 	code := bigI.String()
-	query := "UPDATE User SET code = $1 WHERE username = $2"
+	query := "UPDATE Users SET code = $1 WHERE username = $2"
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {
 		log.Println("Error while preparing statement [GenerateNewCode]")

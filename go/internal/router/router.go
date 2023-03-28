@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/SupaJuke/Deviner/go/internal/handlers"
-	"github.com/SupaJuke/Deviner/go/internal/middleware/auth"
+	"github.com/SupaJuke/Indovinare/go/internal/handlers"
+	"github.com/SupaJuke/Indovinare/go/internal/middleware/auth"
 )
 
 // ================================ Middleware ================================ //
