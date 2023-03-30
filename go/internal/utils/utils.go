@@ -1,12 +1,15 @@
 package utils
 
 import (
+	"errors"
 	"log"
 	"net/http"
+	"strings"
 
-	"github.com/SupaJuke/Indovinare/go/internal/middleware/auth"
 	"github.com/golang-jwt/jwt/v5"
 )
+
+var JWTKey string
 
 type Claims struct {
 	Username string `json:"username"`
@@ -24,9 +27,25 @@ func parseStatus(status int) string {
 	}
 }
 
+func JWTKeyFunc(token *jwt.Token) (interface{}, error) {
+	if JWTKey == "" {
+		log.Fatalln(errors.New("JWT key not found"))
+	}
+
+	return []byte(JWTKey), nil
+}
+
+func GetTokenFromHeader(r *http.Request) string {
+	if _, tokenStr, ok := strings.Cut(r.Header.Get("Authentication"), "token "); ok {
+		return tokenStr
+	}
+
+	return ""
+}
+
 func GetUsernameFromJWT(tokenStr string) string {
 	claims := Claims{}
-	_, err := jwt.ParseWithClaims(tokenStr, &claims, auth.JWTKeyFunc)
+	_, err := jwt.ParseWithClaims(tokenStr, &claims, JWTKeyFunc)
 	if err != nil {
 		log.Println("Error while parsing claim: ", err)
 		return parseStatus(http.StatusBadRequest)

@@ -35,3 +35,9 @@ A project I should have made 2 years ago for Agoda internship.
 ## Installation
 
 Please go to `go`/`react` and follow the instructions in each folder to run back and frontend respectively
+
+## :>
+
+```
+NTEgNzUgNjUgNzMgNzQgNjEgMjAgQzMgQTggMjAgNzAgNjUgNzIgMjAgNzQgNjUgMkMgMjAgNEUgNjUgNkMgNkMgNkY=
+```
