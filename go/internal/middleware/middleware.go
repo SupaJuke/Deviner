@@ -14,6 +14,15 @@ import (
 func Method(methods ...string) func(handler http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
+			// Handling pre-flight requests
+			if r.Method == "OPTIONS" {
+				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
 			supported := false
 			for _, method := range methods {
 				supported = r.Method == method

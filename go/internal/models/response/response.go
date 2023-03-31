@@ -7,8 +7,8 @@ import (
 )
 
 type Response struct {
-	Success bool   `json:"success,omitempty"`
-	Msg     string `json:"message,omitempty"`
+	Success bool   `json:"success"`
+	Msg     string `json:"message"`
 	Token   string `json:"token,omitempty"`
 }
 

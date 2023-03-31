@@ -28,14 +28,14 @@ func Authenticate(username, password string) (string, int, error) {
 	user, err := users.GetByUsername(username)
 	if err != nil {
 		log.Println("Failed while getting user: ", err)
-		return "", http.StatusBadRequest, errors.New("User not found")
+		return "", http.StatusOK, errors.New("User not found")
 	}
 
 	// Check password
 	auth := user.Authenticate(password)
 	if auth != nil {
-		log.Println("Password Incorrect")
-		return "", http.StatusUnauthorized, errors.New("Password incorrect")
+		log.Printf("User %s Password Incorrect", username)
+		return "", http.StatusOK, errors.New("Username or Password incorrect")
 	}
 
 	// Genearting token for user

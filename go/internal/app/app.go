@@ -11,8 +11,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// const defaultPort = "8080"
-
 func Run() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalln(err)

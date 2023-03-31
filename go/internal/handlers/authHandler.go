@@ -16,12 +16,14 @@ type Credentials struct {
 }
 
 func HandleAuthenticate(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	// Parsing request
 	cred := Credentials{}
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&cred); err != nil {
-		log.Println("Error while parsing request [Authenticate]: ", err)
+		log.Println("Error while parsing request [HandleAuthenticate]: ", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

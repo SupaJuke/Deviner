@@ -3,6 +3,7 @@ package router
 import (
 	"log"
 	"net/http"
+	"os"
 
 	h "github.com/SupaJuke/Indovinare/go/internal/handlers"
 	mw "github.com/SupaJuke/Indovinare/go/internal/middleware"
@@ -24,8 +25,12 @@ func Serve() {
 	mux.Handle("/guess", mw.Method("POST")(mw.Authorize(guessHandler)))
 
 	// Serve
-	log.Println("Now listening and serving on port 8080")
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	port := os.Getenv("APP_PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Println("Now listening and serving on port :" + port)
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		log.Fatalln("Error while serving")
 	}
 }
