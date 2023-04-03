@@ -76,7 +76,7 @@ func Authorize(tokenStr string) (int, error) {
 		if err == jwt.ErrSignatureInvalid {
 			return http.StatusUnauthorized, err
 		}
-		return http.StatusBadRequest, errors.New("Failed reading token")
+		return http.StatusBadRequest, err
 	}
 
 	if !token.Valid {

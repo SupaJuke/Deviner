@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -14,11 +13,12 @@ import (
 func Method(methods ...string) func(handler http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+			w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authentication, X-Requested-With")
+
 			// Handling pre-flight requests
 			if r.Method == "OPTIONS" {
-				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
-				w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, POST")
-				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
 				w.WriteHeader(http.StatusOK)
 				return
 			}
@@ -56,7 +56,7 @@ func Authorize(handler http.Handler) http.Handler {
 			log.Println("User unauthorized")
 			res := response.Response{
 				Success: false,
-				Msg:     fmt.Sprintf("Failed to login: %s", err),
+				Msg:     "Failed to authorize: " + err.Error(),
 			}
 			_ = res.WriteResp(w, httpCode)
 			return

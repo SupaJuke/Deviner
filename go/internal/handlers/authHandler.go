@@ -16,8 +16,6 @@ type Credentials struct {
 }
 
 func HandleAuthenticate(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
 	// Parsing request
 	cred := Credentials{}
 	dec := json.NewDecoder(r.Body)
