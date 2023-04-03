@@ -1,17 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { Button, Modal, Form, Input } from "antd";
 import TokenContext from "../context";
-
-interface Credential {
-  username: string;
-  password: string;
-}
-
-interface Response {
-  success: boolean;
-  message: string;
-  token?: string;
-}
+import post, { CredentialInput } from "../utils/post";
 
 const LoginModal: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,18 +15,7 @@ const LoginModal: React.FC = () => {
     showModal(true);
   }, []);
 
-  const post = async (url: string, cred: Credential): Promise<Response> => {
-    const res = await fetch(url, {
-      method: "POST",
-      body: JSON.stringify(cred),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    return res.json();
-  };
-
-  const onFinish = async (cred: Credential) => {
+  const onFinish = async (cred: CredentialInput) => {
     const url = "http://localhost:8080/login";
     const res = await post(url, cred);
     console.log(res);
@@ -44,6 +23,7 @@ const LoginModal: React.FC = () => {
       setToken(res.token);
       showModal(false);
     }
+    // TODO: alert or smth once login fails
   };
 
   const loginForm = () => (
