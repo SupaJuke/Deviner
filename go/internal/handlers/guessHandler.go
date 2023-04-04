@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/SupaJuke/Indovinare/go/internal/models/response"
 	"github.com/SupaJuke/Indovinare/go/internal/models/users"
@@ -46,7 +47,21 @@ func compareGuess(username, guess string) (int, error) {
 
 	// Check if guess correct
 	if guess != code {
-		return http.StatusOK, errors.New("Guess incorrect")
+		yDigit, gDigit := 0, 0
+		for i := range code {
+			if code[i] == guess[i] {
+				gDigit++
+				code = strings.Replace(code, string(code[i]), "x", 1)
+			}
+		}
+		for i := range code {
+			if strings.Contains(code, string(guess[i])) {
+				yDigit++
+				code = strings.Replace(code, string(guess[i]), "x", 1)
+			}
+		}
+		errMsg := fmt.Sprintf("G: %d Y: %d", gDigit, yDigit)
+		return http.StatusOK, errors.New(errMsg)
 	}
 
 	// Generate new code
@@ -79,6 +94,14 @@ func HandleGuess(w http.ResponseWriter, r *http.Request) {
 			Success: false,
 			Msg:     fmt.Sprintf("Guess failed: %s", err),
 		}
+		if httpCode == http.StatusOK {
+			var g, y string
+			fmt.Sscanf(err.Error(), "G: %s Y: %s", &g, &y)
+			res.Msg = "Guess incorrect"
+			res.Green = g
+			res.Yellow = y
+		}
+
 		err = res.WriteResp(w, httpCode)
 		if err == nil {
 			log.Printf("Guess unsuccessful for user '%s'", username)

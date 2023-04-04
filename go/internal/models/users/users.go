@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"strings"
 
 	"crypto/rand"
 
@@ -156,6 +157,9 @@ func (user User) GenerateNewCode() error {
 
 	// Inserting the new code to DB
 	code := bigI.String()
+	for len(code) < 5 {
+		code = strings.Repeat("0", 5-len(code)) + code
+	}
 	query := "UPDATE Users SET code = $1 WHERE username = $2"
 	stmt, err := db.DB.Prepare(query)
 	if err != nil {

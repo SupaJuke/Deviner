@@ -10,6 +10,8 @@ type Response struct {
 	Success bool   `json:"success"`
 	Msg     string `json:"message"`
 	Token   string `json:"token,omitempty"`
+	Green   string `json:"green,omitempty"`
+	Yellow  string `json:"yellow,omitempty"`
 }
 
 func (r Response) WriteResp(w http.ResponseWriter, code int) error {
