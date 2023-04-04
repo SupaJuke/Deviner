@@ -2,6 +2,8 @@ interface Response {
   success: boolean;
   message: string;
   token?: string;
+  green?: string;
+  yellow?: string;
 }
 
 export interface CredentialInput {

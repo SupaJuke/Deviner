@@ -1,11 +1,53 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import TokenContext from "../context";
-import { Button, Card, Space } from "antd";
-import post, { GuessInput } from "../utils/post";
+import { Space, message } from "antd";
+import post from "../utils/post";
+import Hint from "./Hint";
+import Submit from "./Submit";
+import Inputs from "./Inputs";
+
+// Constants
 
 const Guess: React.FC = () => {
-  const [guess, setGuess] = useState("");
   const token = useContext(TokenContext).token;
+  const [guess, setGuess] = useState("");
+  const [width, setWidth] = useState(0);
+  const [messageApi, contextHolder] = message.useMessage();
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Dynamically resizing submit button
+  const handleResize = () => {
+    if (ref.current && ref.current.offsetWidth !== width) {
+      setWidth(ref.current.offsetWidth);
+    }
+  };
+  const resizeObserver = new ResizeObserver(handleResize);
+
+  useEffect(() => {
+    if (ref.current) {
+      resizeObserver.observe(ref.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // POST calls handlers
+  const handleSuccess = (guess: string) => {
+    messageApi.open({
+      type: "success",
+      content: `Guess ${guess} is correct! Now generating new guess...`,
+    });
+  };
+
+  const handleFailure = (green: string, yellow: string) => {
+    messageApi.open({
+      type: "error",
+      content: <Hint green={green} yellow={yellow} />,
+      duration: 10,
+    });
+  };
 
   const handleSubmit = async () => {
     const url = "http://localhost:8080/guess";
@@ -14,10 +56,17 @@ const Guess: React.FC = () => {
       { guess: guess },
       { Authentication: "token " + token }
     );
-    console.log(res);
-    // TODO: implement result checking
+    if (res.success) {
+      handleSuccess(guess);
+      setGuess("");
+    } else {
+      if (res.green && res.yellow) {
+        handleFailure(res.green, res.yellow);
+      }
+    }
   };
 
+  // Mouse events handlers
   const handleNumber = (e: React.MouseEvent) => {
     if (guess.length >= 5) {
       return;
@@ -25,7 +74,6 @@ const Guess: React.FC = () => {
 
     const value = e.currentTarget.getAttribute("value");
     setGuess(guess + value);
-    console.log(guess);
   };
 
   const handleDel = () => {
@@ -36,10 +84,7 @@ const Guess: React.FC = () => {
     setGuess(guess.substring(0, guess.length - 1));
   };
 
-  const nums = [...Array(10).keys()];
-  nums.shift();
-  nums.push(0);
-
+  // Styling
   const center = {
     display: "flex",
     alignItems: "center",
@@ -47,96 +92,43 @@ const Guess: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        ...center,
-        width: "100%",
-        height: "100vh",
-        background: "#1c2e4a",
-        color: "white",
-      }}
-    >
+    <>
       <div
         style={{
           ...center,
-          flexDirection: "column",
-          width: "25%",
+          width: "100%",
+          height: "100vh",
+          background: "#1c2e4a",
+          color: "white",
         }}
       >
         <div
+          ref={ref}
           style={{
             ...center,
-            width: "100%",
-            minWidth: "250px",
-            height: "125px",
-            borderStyle: "solid",
-            borderRadius: "20px",
-            fontSize: "5em",
+            flexDirection: "column",
+            width: "25%",
           }}
         >
-          {guess}
-        </div>
-
-        <br />
-
-        <Button
-          ghost={true}
-          style={{
-            ...center,
-            width: "100%",
-            minWidth: "250px",
-            height: "80px",
-            fontSize: "3em",
-          }}
-          disabled={guess.length !== 5}
-          onClick={handleSubmit}
-        >
-          Submit
-        </Button>
-
-        <br />
-
-        <Space
-          size={[10, 10]}
-          wrap={true}
-          style={{
-            width: "100%",
-            minWidth: "250px",
-            maxWidth: "550px",
-            justifyContent: "center",
-          }}
-        >
-          {nums.map((num) => {
-            return (
-              <Button
-                value={num}
-                key={num}
-                onClick={handleNumber}
-                ghost={true}
-                style={{
-                  width: "80px",
-                  height: "80px",
-                  fontSize: "3em",
-                }}
-              >
-                {num}
-              </Button>
-            );
-          })}
-          <Button
-            ghost={true}
+          <div
             style={{
-              width: "170px",
-              height: "80px",
-              fontSize: "3em",
+              ...center,
+              width: "100%",
+              minWidth: "250px",
+              height: "125px",
+              borderStyle: "solid",
+              borderRadius: "20px",
+              fontSize: "5em",
             }}
-            onClick={handleDel}
           >
-            Delete
-          </Button>
-        </Space>
+            {guess}
+          </div>
+          <Submit guess={guess} width={width} handleSubmit={handleSubmit} />
+          <Inputs handleNumber={handleNumber} handleDel={handleDel} />
+        </div>
       </div>
-    </div>
+      {contextHolder}
+    </>
   );
 };
 
