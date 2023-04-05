@@ -21,4 +21,6 @@ If you choose the second option, we have provided a script `/scripts/setup-db.sh
 
 ### Golang
 
-**TODO**
+While on the root of the backend directory, run `go run cmd/app/app.go` to start the application. If you ever so prefer, you can also run `go build cmd/app/app.go`, which will populate `app` binary in current diretory. You can then simply run the binary via `./app` to start the application.
+
+NOTE: Right now the only existing user account in the database is `admin` with no password.
