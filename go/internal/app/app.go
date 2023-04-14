@@ -5,8 +5,8 @@ import (
 	"os"
 
 	db "github.com/SupaJuke/Indovinare/go/internal/database"
+	"github.com/SupaJuke/Indovinare/go/internal/pkg/auth"
 	"github.com/SupaJuke/Indovinare/go/internal/router"
-	"github.com/SupaJuke/Indovinare/go/internal/utils"
 
 	"github.com/joho/godotenv"
 )
@@ -19,6 +19,6 @@ func Run() {
 	db.InitDB()
 	log.Println("Initialized connection to database")
 	// _, _ = users.Create("tester", "password")
-	utils.JWTKey = os.Getenv("JWT_KEY")
+	auth.JWTKey = os.Getenv("JWT_KEY")
 	router.Serve()
 }

@@ -7,7 +7,7 @@ import (
 
 	"github.com/SupaJuke/Indovinare/go/internal/models/response"
 	"github.com/SupaJuke/Indovinare/go/internal/pkg/auth"
-	"github.com/SupaJuke/Indovinare/go/internal/utils"
+	"github.com/SupaJuke/Indovinare/go/internal/pkg/request"
 )
 
 func Method(methods ...string) func(handler http.Handler) http.Handler {
@@ -50,7 +50,7 @@ func Method(methods ...string) func(handler http.Handler) http.Handler {
 
 func Authorize(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenStr := utils.GetTokenFromHeader(r)
+		tokenStr := request.GetTokenFromHeader(r)
 		httpCode, err := auth.Authorize(tokenStr)
 		if err != nil {
 			log.Println("User unauthorized")

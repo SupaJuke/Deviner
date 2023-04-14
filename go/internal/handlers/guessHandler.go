@@ -11,7 +11,7 @@ import (
 
 	"github.com/SupaJuke/Indovinare/go/internal/models/response"
 	"github.com/SupaJuke/Indovinare/go/internal/models/users"
-	"github.com/SupaJuke/Indovinare/go/internal/utils"
+	"github.com/SupaJuke/Indovinare/go/internal/pkg/request"
 )
 
 type Guess struct {
@@ -45,16 +45,20 @@ func compareGuess(username, guess string) (int, error) {
 		return http.StatusBadRequest, errors.New(msg)
 	}
 
-	// Check if guess correct
+	// Check if guess correct & Give hints if not
 	if guess != code {
 		yDigit, gDigit := 0, 0
 		for i := range code {
 			if code[i] == guess[i] {
 				gDigit++
+				guess = strings.Replace(guess, string(guess[i]), "y", 1)
 				code = strings.Replace(code, string(code[i]), "x", 1)
 			}
 		}
 		for i := range code {
+			if guess[i] == 'y' {
+				continue
+			}
 			if strings.Contains(code, string(guess[i])) {
 				yDigit++
 				code = strings.Replace(code, string(guess[i]), "x", 1)
@@ -85,7 +89,7 @@ func HandleGuess(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extracting guess
-	username := utils.GetUsernameFromJWT(utils.GetTokenFromHeader(r))
+	username := request.GetUsernameFromJWT(request.GetTokenFromHeader(r))
 	httpCode, err := compareGuess(username, guess.Guess)
 
 	// Creating response
@@ -104,7 +108,7 @@ func HandleGuess(w http.ResponseWriter, r *http.Request) {
 
 		err = res.WriteResp(w, httpCode)
 		if err == nil {
-			log.Printf("Guess unsuccessful for user '%s'", username)
+			log.Printf("Guess %s unsuccessful for user '%s'", guess.Guess, username)
 		}
 		return
 	}

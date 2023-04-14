@@ -7,14 +7,23 @@ import (
 	"time"
 
 	"github.com/SupaJuke/Indovinare/go/internal/models/users"
-	"github.com/SupaJuke/Indovinare/go/internal/utils"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
+var JWTKey string
+
 type Claims struct {
 	Username string `json:"username"`
 	jwt.RegisteredClaims
+}
+
+func JWTKeyFunc(token *jwt.Token) (interface{}, error) {
+	if JWTKey == "" {
+		log.Fatalln(errors.New("JWT key not found"))
+	}
+
+	return []byte(JWTKey), nil
 }
 
 func Authenticate(username, password string) (string, int, error) {
@@ -48,7 +57,7 @@ func Authenticate(username, password string) (string, int, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, err := token.SignedString([]byte(utils.JWTKey))
+	tokenStr, err := token.SignedString([]byte(JWTKey))
 	if err != nil {
 		log.Println("Internal error while generating token: ", err)
 		return "", http.StatusInternalServerError, errors.New(http.StatusText(http.StatusInternalServerError))
@@ -70,7 +79,7 @@ func Authorize(tokenStr string) (int, error) {
 	}
 
 	claims := Claims{}
-	token, err := jwt.ParseWithClaims(tokenStr, &claims, utils.JWTKeyFunc)
+	token, err := jwt.ParseWithClaims(tokenStr, &claims, JWTKeyFunc)
 	if err != nil {
 		log.Println("Failed after parsing claims:", err)
 		if err == jwt.ErrSignatureInvalid {
