@@ -1,12 +1,10 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import TokenContext from "../context";
-import { Space, message } from "antd";
+import { message } from "antd";
 import post from "../utils/post";
 import Hint from "./Hint";
 import Submit from "./Submit";
 import Inputs from "./Inputs";
-
-// Constants
 
 const Guess: React.FC = () => {
   const token = useContext(TokenContext).token;
