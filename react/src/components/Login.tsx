@@ -13,7 +13,7 @@ const LoginModal: React.FC = () => {
   };
 
   useEffect(() => {
-    showModal(true);
+    showModal(false);
   }, []);
 
   const handleSuccess = (user: string) => {

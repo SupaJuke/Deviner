@@ -1,7 +1,5 @@
 import { Space, Button } from "antd";
-import { multUnit } from "../utils/size";
-
-const UNIT = 80;
+import { UNIT, multUnit } from "../utils/size";
 
 type Handlers = {
   handleNumber: (e: React.MouseEvent) => void;

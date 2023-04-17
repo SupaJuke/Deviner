@@ -84,9 +84,8 @@ const Guess: React.FC = () => {
 
   // Styling
   const center = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    display: "grid",
+    placeItems: "center",
   };
 
   return (
@@ -104,7 +103,6 @@ const Guess: React.FC = () => {
           ref={ref}
           style={{
             ...center,
-            flexDirection: "column",
             width: "25%",
           }}
         >
